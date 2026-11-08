@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class Reference:
     def __init__(self):
-        self.data = (ROOT / 'Payload/Hanoi Plus.app/Hanoi Plus').read_bytes()
+        self.data = (ROOT / 'Original/Payload/Hanoi Plus.app/Hanoi Plus').read_bytes()
         self.sections = []
         self.symbols = {}
         self.stubs = {}

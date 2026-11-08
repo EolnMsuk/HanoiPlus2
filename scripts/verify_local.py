@@ -14,7 +14,7 @@ import wave
 import xml.etree.ElementTree as ET
 import zipfile
 import zlib
-from prepare_assets import ROOT, RESOURCE_NAMES, IPA_SHA256, png_chunks, unfilter
+from prepare_assets import ROOT, ORIGINAL_DIR, RESOURCE_NAMES, IPA_SHA256, png_chunks, unfilter
 
 
 def read_project(path):
@@ -77,6 +77,8 @@ def check_resources(inspect_reference=True):
     assert [entry['name'] for entry in entries] == RESOURCE_NAMES
     directory = ROOT / 'ios/HanoiPlus/Resources'
     assert {p.name for p in directory.iterdir()} == set(RESOURCE_NAMES)
+    assert len(RESOURCE_NAMES) == 17
+    assert [sum(name.endswith(suffix) for name in RESOURCE_NAMES) for suffix in ('.png', '.wav', '.jpg')] == [13, 2, 2]
     for entry in entries:
         path = directory / entry['name']
         assert hashlib.sha256(path.read_bytes()).hexdigest() == entry['prepared_sha256'], path
@@ -94,15 +96,15 @@ def check_resources(inspect_reference=True):
         pixels = int(float(entry['size'].split('x')[0]) * int(entry['scale'][0]))
         w, h, depth, color, _ = check_png(catalog / entry['filename'])
         assert (w, h, depth, color) == (pixels, pixels, 8, 2), entry # Opaque RGB.
-    print('Assets: 25 resources, hashes, PNG CRC/scanlines, WAVs and 9 opaque icon slots passed.')
-    ipa = ROOT / 'Hanoi Plus 1.1.ipa'
+    print('Assets: 17 resources (13 PNGs, 2 WAVs, 2 JPEGs), hashes, PNG CRC/scanlines, WAVs and 9 opaque icon slots passed.')
+    ipa = ORIGINAL_DIR / 'Hanoi Plus 1.1.ipa'
     if inspect_reference and ipa.exists():
         assert hashlib.sha256(ipa.read_bytes()).hexdigest() == IPA_SHA256
         with zipfile.ZipFile(ipa) as archive:
             for entry in entries:
                 source = archive.read(entry['archive_path'])
                 assert hashlib.sha256(source).hexdigest() == entry['source_sha256']
-                assert (ROOT / entry['archive_path']).read_bytes() == source
+                assert (ORIGINAL_DIR / entry['archive_path']).read_bytes() == source
                 if not entry['normalized_cgbi']: continue
                 original = png_chunks(source)
                 w, h = entry['source_dimensions']
@@ -118,9 +120,9 @@ def check_resources(inspect_reference=True):
                             assert all(abs(c - (cc * a + 127) // 255) <= 1 for c, cc in zip((r, g, b), (rr, gg, bb)))
                         else:
                             assert (rr, gg, bb) == (0, 0, 0)
-            assert archive.read('iTunesArtwork') == (ROOT / 'iTunesArtwork').read_bytes()
-            for path in (ROOT / 'Payload/Hanoi Plus.app').rglob('*'):
-                if path.is_file(): assert path.read_bytes() == archive.read(path.relative_to(ROOT).as_posix()), path
+            assert archive.read('iTunesArtwork') == (ORIGINAL_DIR / 'iTunesArtwork').read_bytes()
+            for path in (ORIGINAL_DIR / 'Payload/Hanoi Plus.app').rglob('*'):
+                if path.is_file(): assert path.read_bytes() == archive.read(path.relative_to(ORIGINAL_DIR).as_posix()), path
             binary = archive.read('Payload/Hanoi Plus.app/Hanoi Plus')
             assert hashlib.sha256(binary).hexdigest() == '9683769faca37bc918f43a384b06a5983f006e6fc88489506fd5d5146915b310'
         print('References: unchanged IPA, entire extracted app and artwork; CgBI channel/alpha round-trip passed.')
@@ -159,9 +161,9 @@ def check_project():
     phases = {objects[key]['isa']: objects[key] for key in target['buildPhases']}
     def phase_files(phase): return [files[objects[key]['fileRef']] for key in phases[phase]['files']]
     resources = phase_files('PBXResourcesBuildPhase')
-    assert len(resources) == 26 and {p.name for p in resources} == set(RESOURCE_NAMES + ['Assets.xcassets'])
+    assert len(resources) == 18 and {p.name for p in resources} == set(RESOURCE_NAMES + ['Assets.xcassets'])
     sources = phase_files('PBXSourcesBuildPhase')
-    assert len(sources) == 9
+    assert len(sources) == 10
     assert set(sources) == {p for p in (ROOT / 'ios/HanoiPlus').iterdir() if p.suffix in ('.m', '.c')}
     for configuration in objects[target['buildConfigurationList']]['buildConfigurations']:
         settings = objects[configuration]['buildSettings']

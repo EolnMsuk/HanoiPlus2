@@ -3,12 +3,23 @@
 #include <string.h>
 
 int HPGameDiskCount(const HPGame *game) { return game->level + 3; }
-int HPGameMinimumMoves(const HPGame *game) { return (1 << HPGameDiskCount(game)) - 1; }
+int HPMinimumMovesForLevel(int level) {
+    return level >= 0 && level < HPLevelCount ? (1 << (level + 3)) - 1 : 0;
+}
+int HPGameMinimumMoves(const HPGame *game) { return HPMinimumMovesForLevel(game->level); }
+
+static void HPSetStartingStack(HPGame *game) {
+    game->moves = 0;
+    game->phase = HPPlaying;
+    memset(game->counts, 0, sizeof(game->counts));
+    memset(game->disks, 0, sizeof(game->disks));
+    game->counts[0] = HPGameDiskCount(game);
+    for (int i = 0; i < game->counts[0]; ++i) game->disks[0][i] = i;
+}
 
 void HPGameNew(HPGame *game) {
     memset(game, 0, sizeof(*game));
-    game->counts[0] = 3;
-    for (int i = 0; i < 3; ++i) game->disks[0][i] = i;
+    HPSetStartingStack(game);
 }
 
 int HPGameIsValid(const HPGame *game) {
@@ -16,7 +27,7 @@ int HPGameIsValid(const HPGame *game) {
         game->moves < 0 || game->totalMoves < game->moves ||
         game->phase < HPPlaying || game->phase > HPWon) return 0;
     long long previousMinimum = 0;
-    for (int level = 0; level < game->level; ++level) previousMinimum += (1 << (level + 3)) - 1;
+    for (int level = 0; level < game->level; ++level) previousMinimum += HPMinimumMovesForLevel(level);
     if (game->totalMoves - game->moves < previousMinimum) return 0;
     if (game->level == 0 && game->totalMoves != game->moves) return 0;
     int seen = 0, n = HPGameDiskCount(game);
@@ -63,12 +74,14 @@ int HPGameAdvance(HPGame *game) {
         game->phase = HPWon;
     } else {
         ++game->level;
-        game->moves = 0;
-        game->phase = HPPlaying;
-        memset(game->counts, 0, sizeof(game->counts));
-        memset(game->disks, 0, sizeof(game->disks));
-        game->counts[0] = HPGameDiskCount(game);
-        for (int i = 0; i < game->counts[0]; ++i) game->disks[0][i] = i;
+        HPSetStartingStack(game);
     }
+    return 1;
+}
+
+int HPGameRestart(HPGame *game) {
+    if (!HPGameIsValid(game) || game->phase != HPPlaying) return 0;
+    game->totalMoves -= game->moves;
+    HPSetStartingStack(game);
     return 1;
 }

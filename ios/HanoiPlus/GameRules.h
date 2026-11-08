@@ -17,8 +17,10 @@ typedef struct {
 void HPGameNew(HPGame *game);
 int HPGameDiskCount(const HPGame *game);
 int HPGameMinimumMoves(const HPGame *game);
+int HPMinimumMovesForLevel(int level);
 int HPGameIsValid(const HPGame *game);
 HPMoveResult HPGameMove(HPGame *game, int from, int to);
 int HPGameAdvance(HPGame *game);
+int HPGameRestart(HPGame *game);
 
 #endif

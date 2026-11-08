@@ -209,54 +209,6 @@
 			"path" = "disk_9.png";
 			"sourceTree" = "<group>";
 		};
-		"4B7E0008DA6E2AD7A19CC649" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "image.jpeg";
-			"path" = "hanoi_0.jpg";
-			"sourceTree" = "<group>";
-		};
-		"CB7CF9BB565B87EECECC7717" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "image.jpeg";
-			"path" = "hanoi_1.jpg";
-			"sourceTree" = "<group>";
-		};
-		"AA63989BB43D064DEDF4D8F9" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "image.jpeg";
-			"path" = "hanoi_2.jpg";
-			"sourceTree" = "<group>";
-		};
-		"BC4E09D1D85985FB5A0FB39D" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "image.jpeg";
-			"path" = "hanoi_3.jpg";
-			"sourceTree" = "<group>";
-		};
-		"DE68F4C5F5AAA2B80A86460F" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "image.jpeg";
-			"path" = "hanoi_4.jpg";
-			"sourceTree" = "<group>";
-		};
-		"8DB96D8E4CE8673B8AB2C53A" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "image.jpeg";
-			"path" = "hanoi_5.jpg";
-			"sourceTree" = "<group>";
-		};
-		"291DF5E909F1311CAB23B018" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "image.jpeg";
-			"path" = "hanoi_6.jpg";
-			"sourceTree" = "<group>";
-		};
-		"A2EB3D165C1E84D14223834E" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "image.jpeg";
-			"path" = "hanoi_7.jpg";
-			"sourceTree" = "<group>";
-		};
 		"05529D7BAF9BE1F1AD75AA78" = {
 			"isa" = "PBXFileReference";
 			"lastKnownFileType" = "folder.assetcatalog";
@@ -289,14 +241,6 @@
 				"88F1E8FA1AAB0A550B009550",
 				"E77256A78E94B0032DA31A19",
 				"2B49291AFA62A3DBE7E256AA",
-				"4B7E0008DA6E2AD7A19CC649",
-				"CB7CF9BB565B87EECECC7717",
-				"AA63989BB43D064DEDF4D8F9",
-				"BC4E09D1D85985FB5A0FB39D",
-				"DE68F4C5F5AAA2B80A86460F",
-				"8DB96D8E4CE8673B8AB2C53A",
-				"291DF5E909F1311CAB23B018",
-				"A2EB3D165C1E84D14223834E",
 			);
 			"path" = "Resources";
 			"sourceTree" = "<group>";
@@ -324,6 +268,8 @@
 				"8873151C067A966D8A2B0623",
 				"05529D7BAF9BE1F1AD75AA78",
 				"DE4D1224A6DDC8F54558560F",
+				"D3752682AF838DD462B7935C",
+				"A757C7272F81755BECCD7D5E",
 			);
 			"path" = "HanoiPlus";
 			"sourceTree" = "<group>";
@@ -450,6 +396,7 @@
 				"78CA589BFB80052C30DD82C3",
 				"589CCFF99EC14953AE6B9994",
 				"C17D9DD39053C119106834A9",
+				"FD52CFDC203B910D0BC971F1",
 			);
 			"runOnlyForDeploymentPostprocessing" = "0";
 		};
@@ -521,38 +468,6 @@
 			"isa" = "PBXBuildFile";
 			"fileRef" = "2B49291AFA62A3DBE7E256AA";
 		};
-		"F8F3C2E38294B9C7BB3277A3" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "4B7E0008DA6E2AD7A19CC649";
-		};
-		"9E747A6A468F3EDED745E1EF" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "CB7CF9BB565B87EECECC7717";
-		};
-		"B1936E128080A63D81CDE9DD" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "AA63989BB43D064DEDF4D8F9";
-		};
-		"9B02E331D1A0312ACB5E4D1B" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "BC4E09D1D85985FB5A0FB39D";
-		};
-		"15EFBDBA4806531351F89BC0" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "DE68F4C5F5AAA2B80A86460F";
-		};
-		"2F9C3204F08D886037CDDFB9" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "8DB96D8E4CE8673B8AB2C53A";
-		};
-		"76ADC6E7E700D3E0D5277E5F" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "291DF5E909F1311CAB23B018";
-		};
-		"781F209CBEB1439428E3BBDC" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "A2EB3D165C1E84D14223834E";
-		};
 		"CF52F5494423AF6A38CC3F1F" = {
 			"isa" = "PBXBuildFile";
 			"fileRef" = "05529D7BAF9BE1F1AD75AA78";
@@ -578,14 +493,6 @@
 				"6738B902120CE318841CD72B",
 				"029193A9DE6FCE659515C33B",
 				"8487B19BBB74597DEB7F7063",
-				"F8F3C2E38294B9C7BB3277A3",
-				"9E747A6A468F3EDED745E1EF",
-				"B1936E128080A63D81CDE9DD",
-				"9B02E331D1A0312ACB5E4D1B",
-				"15EFBDBA4806531351F89BC0",
-				"2F9C3204F08D886037CDDFB9",
-				"76ADC6E7E700D3E0D5277E5F",
-				"781F209CBEB1439428E3BBDC",
 				"CF52F5494423AF6A38CC3F1F",
 			);
 			"runOnlyForDeploymentPostprocessing" = "0";
@@ -788,6 +695,22 @@
 			"targets" = (
 				"34A04005BCAF206EEC990BD9",
 			);
+		};
+		"D3752682AF838DD462B7935C" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.c.c";
+			"path" = "GameDuration.c";
+			"sourceTree" = "<group>";
+		};
+		"FD52CFDC203B910D0BC971F1" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "D3752682AF838DD462B7935C";
+		};
+		"A757C7272F81755BECCD7D5E" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.c.h";
+			"path" = "GameDuration.h";
+			"sourceTree" = "<group>";
 		};
 	};
 	"rootObject" = "244210E48437B6556980A702";

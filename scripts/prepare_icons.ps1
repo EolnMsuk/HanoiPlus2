@@ -3,7 +3,7 @@ Add-Type -AssemblyName System.Drawing
 $projectRoot = Split-Path -Parent $PSScriptRoot
 $iconDirectory = Join-Path $projectRoot 'ios/HanoiPlus/Assets.xcassets/AppIcon.appiconset'
 [void][System.IO.Directory]::CreateDirectory($iconDirectory)
-$artwork = [System.Drawing.Image]::FromFile((Join-Path $projectRoot 'iTunesArtwork'))
+$artwork = [System.Drawing.Image]::FromFile((Join-Path $projectRoot 'Original/iTunesArtwork'))
 try {
     if ($artwork.Width -ne 512 -or $artwork.Height -ne 512) { throw 'Unexpected reference artwork size' }
     foreach ($size in @(40, 58, 60, 80, 87, 120, 180, 1024)) {

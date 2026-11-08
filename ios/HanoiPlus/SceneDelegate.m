@@ -12,6 +12,7 @@
     [(GameViewController *)self.window.rootViewController sceneDidActivate];
 }
 - (void)sceneWillResignActive:(UIScene *)scene {
+    // All three exit callbacks use the same idempotent pause/checkpoint path.
     [(GameViewController *)self.window.rootViewController sceneWillDeactivate];
 }
 - (void)sceneDidEnterBackground:(UIScene *)scene {

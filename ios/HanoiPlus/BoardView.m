@@ -4,13 +4,15 @@
 
 @implementation BoardView {
     NSArray<UIImage *> *_diskImages;
-    UIImage *_background;
     UIImage *_base;
     UITouch *_activeTouch;
     NSInteger _dragPost;
     NSInteger _dragDisk;
     CGPoint _dragCenter;
+    HPGame _completedBoard;
+    BOOL _frozen;
 }
+@synthesize reservedControlFrames = _reservedControlFrames;
 
 - (instancetype)initWithState:(GameState *)state {
     if ((self = [super initWithFrame:CGRectMake(0, 0, 480, 320)])) {
@@ -20,7 +22,7 @@
         self.exclusiveTouch = YES;
         self.opaque = YES;
         self.backgroundColor = UIColor.blackColor;
-        _background = [AssetLoader imageNamed:[NSString stringWithFormat:@"hanoi_%d.jpg", state.game.level]];
+        _reservedControlFrames = @[];
         _base = [AssetLoader imageNamed:@"base.png"];
         NSMutableArray *images = [NSMutableArray arrayWithCapacity:HPMaxDisks];
         for (int disk = 0; disk < HPMaxDisks; ++disk) {
@@ -61,9 +63,10 @@ static NSInteger HPPostAtPoint(CGPoint point) {
 }
 
 - (void)drawRect:(CGRect)rect {
-    [_background drawInRect:self.bounds];
+    [UIColor.blackColor setFill];
+    UIRectFill(self.bounds);
     [_base drawInRect:CGRectMake(0, 262, 480, 58)];
-    HPGame game = self.state.game;
+    HPGame game = _frozen ? _completedBoard : self.state.game;
     for (int post = 0; post < HPPostCount; ++post) {
         for (int i = 0; i < game.counts[post]; ++i) {
             int disk = game.disks[post][i];
@@ -73,11 +76,25 @@ static NSInteger HPPostAtPoint(CGPoint point) {
     if (_dragDisk != NSNotFound) [self drawDisk:_dragDisk center:_dragCenter];
 }
 
+- (void)setReservedControlFrames:(NSArray<NSValue *> *)frames {
+    if ([_reservedControlFrames isEqualToArray:frames]) return;
+    [self cancelDrag];
+    _reservedControlFrames = [frames copy];
+}
+
+- (BOOL)isPlayablePoint:(CGPoint)point {
+    if (!CGRectContainsPoint(self.bounds, point)) return NO;
+    for (NSValue *value in self.reservedControlFrames) {
+        if (CGRectContainsPoint(value.CGRectValue, point)) return NO;
+    }
+    return YES;
+}
+
 - (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
-    if (_activeTouch || self.state.game.phase != HPPlaying) return;
+    if (_frozen || _activeTouch || self.state.game.phase != HPPlaying) return;
     UITouch *touch = touches.anyObject;
     CGPoint point = [touch locationInView:self];
-    if (!CGRectContainsPoint(self.bounds, point)) return;
+    if (![self isPlayablePoint:point]) return;
     HPGame game = self.state.game;
     NSInteger post = HPPostAtPoint(point);
     if (!game.counts[post]) return;
@@ -108,7 +125,7 @@ static NSInteger HPPostAtPoint(CGPoint point) {
 - (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
     if (!_activeTouch || ![touches containsObject:_activeTouch]) return;
     CGPoint point = [_activeTouch locationInView:self];
-    if (!CGRectContainsPoint(self.bounds, point)) { [self cancelDrag]; return; }
+    if (![self isPlayablePoint:point]) { [self cancelDrag]; return; }
     HPMoveResult result = [self.state moveFrom:_dragPost to:HPPostAtPoint(point)];
     [self cancelDrag];
     if (self.moveHandler) self.moveHandler(result);
@@ -123,5 +140,13 @@ static NSInteger HPPostAtPoint(CGPoint point) {
     _activeTouch = nil;
     _dragDisk = NSNotFound;
     [self setNeedsDisplay];
+}
+
+- (void)freezeCompletedBoard {
+    if (self.state.game.phase != HPLevelComplete) return;
+    [self cancelDrag];
+    _completedBoard = self.state.game;
+    _frozen = YES;
+    // The outgoing view must keep drawing the solved board after atomic advancement.
 }
 @end

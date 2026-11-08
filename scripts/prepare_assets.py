@@ -1,7 +1,7 @@
 """Prepare the supplied IPA assets locally with the Python standard library.
 
 Run on Windows: python scripts/prepare_assets.py
-Original inputs are read-only. Only the explicit 25 resources are extracted.
+Original inputs are read-only. Only the explicit 17 resources are extracted.
 Icon resizing uses Windows System.Drawing via prepare_icons.ps1.
 """
 import hashlib
@@ -13,10 +13,10 @@ import zlib
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
+ORIGINAL_DIR = ROOT / 'Original'
 RESOURCE_NAMES = (['base.png', 'new_game.png', 'continue.png', 'click.wav',
                    'gong.wav', 'hanoi.jpg', 'winScreen.jpg']
-                  + [f'disk_{i}.png' for i in range(10)]
-                  + [f'hanoi_{i}.jpg' for i in range(8)])
+                  + [f'disk_{i}.png' for i in range(10)])
 PNG_MAGIC = b'\x89PNG\r\n\x1a\n'
 IPA_SHA256 = 'c1ac02370feac2a4fbc34d68b5dd4cdb4c656e3b6f7c24894a536ed93a84a1ad'
 
@@ -106,7 +106,7 @@ def normalize_png(data):
 
 
 def prepare():
-    ipa = ROOT / 'Hanoi Plus 1.1.ipa'
+    ipa = ORIGINAL_DIR / 'Hanoi Plus 1.1.ipa'
     if hashlib.sha256(ipa.read_bytes()).hexdigest() != IPA_SHA256:
         raise ValueError('Reference IPA hash differs from the inspected input')
     output = ROOT / 'ios/HanoiPlus/Resources'
@@ -124,8 +124,8 @@ def prepare():
                             'source_sha256': hashlib.sha256(source).hexdigest(),
                             'prepared_sha256': hashlib.sha256(prepared).hexdigest(),
                             'source_dimensions': dimensions, 'normalized_cgbi': normalized})
-        if archive.read('iTunesArtwork') != (ROOT / 'iTunesArtwork').read_bytes():
-            raise ValueError('Root iTunesArtwork differs from archive')
+        if archive.read('iTunesArtwork') != (ORIGINAL_DIR / 'iTunesArtwork').read_bytes():
+            raise ValueError('Original/iTunesArtwork differs from archive')
     subprocess.run(['powershell.exe', '-NoProfile', '-NonInteractive', '-ExecutionPolicy',
                     'Bypass', '-File', str(ROOT / 'scripts/prepare_icons.ps1')], check=True, cwd=ROOT)
     write_catalog()
