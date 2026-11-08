@@ -1,0 +1,181 @@
+{
+  "reference_ipa_sha256": "c1ac02370feac2a4fbc34d68b5dd4cdb4c656e3b6f7c24894a536ed93a84a1ad",
+  "orientation": "unchanged; AssetLoader rotates artwork left once",
+  "resources": [
+    {
+      "name": "base.png",
+      "archive_path": "Payload/Hanoi Plus.app/base.png",
+      "source_sha256": "bc1ff55075ff27550b03b960d7050b8e51c7419448d80a48f29d89f4cf4b3449",
+      "prepared_sha256": "79c71639ff530af649ace13678fa5a39c09ee786f4249783357903228db6ef83",
+      "source_dimensions": [
+        58,
+        480
+      ],
+      "normalized_cgbi": true
+    },
+    {
+      "name": "new_game.png",
+      "archive_path": "Payload/Hanoi Plus.app/new_game.png",
+      "source_sha256": "1052d297bbafddd2654c3eef1387d2d949318a0faea2454fd4ff2ebaafede537",
+      "prepared_sha256": "1052d297bbafddd2654c3eef1387d2d949318a0faea2454fd4ff2ebaafede537",
+      "source_dimensions": [
+        56,
+        227
+      ],
+      "normalized_cgbi": false
+    },
+    {
+      "name": "continue.png",
+      "archive_path": "Payload/Hanoi Plus.app/continue.png",
+      "source_sha256": "e0c6f25da75c30a9ff5ac087760a96609e4f2a98cbb89c09e2b8c70aa3a0b19c",
+      "prepared_sha256": "e0c6f25da75c30a9ff5ac087760a96609e4f2a98cbb89c09e2b8c70aa3a0b19c",
+      "source_dimensions": [
+        56,
+        227
+      ],
+      "normalized_cgbi": false
+    },
+    {
+      "name": "click.wav",
+      "archive_path": "Payload/Hanoi Plus.app/click.wav",
+      "source_sha256": "e6b81ee927e5a63b95738fc9d6e6f4e09505e3586c9e62bf89ce3eacb00d98a3",
+      "prepared_sha256": "e6b81ee927e5a63b95738fc9d6e6f4e09505e3586c9e62bf89ce3eacb00d98a3",
+      "source_dimensions": null,
+      "normalized_cgbi": false
+    },
+    {
+      "name": "gong.wav",
+      "archive_path": "Payload/Hanoi Plus.app/gong.wav",
+      "source_sha256": "330ab9802bd13270d116f2c04fcf6fbb7eecc3f96a6fc4ad751f30caf9ff3f9f",
+      "prepared_sha256": "330ab9802bd13270d116f2c04fcf6fbb7eecc3f96a6fc4ad751f30caf9ff3f9f",
+      "source_dimensions": null,
+      "normalized_cgbi": false
+    },
+    {
+      "name": "hanoi.jpg",
+      "archive_path": "Payload/Hanoi Plus.app/hanoi.jpg",
+      "source_sha256": "a5661ba3f66b1b3ed29335637d8b1264a0830ebe5a6fcc503de2f0a2d5ade9a1",
+      "prepared_sha256": "a5661ba3f66b1b3ed29335637d8b1264a0830ebe5a6fcc503de2f0a2d5ade9a1",
+      "source_dimensions": null,
+      "normalized_cgbi": false
+    },
+    {
+      "name": "winScreen.jpg",
+      "archive_path": "Payload/Hanoi Plus.app/winScreen.jpg",
+      "source_sha256": "e43fc144892c62b03c9b95659bb2f58e5401a324df4c9c288905f4dbeec9a095",
+      "prepared_sha256": "e43fc144892c62b03c9b95659bb2f58e5401a324df4c9c288905f4dbeec9a095",
+      "source_dimensions": null,
+      "normalized_cgbi": false
+    },
+    {
+      "name": "disk_0.png",
+      "archive_path": "Payload/Hanoi Plus.app/disk_0.png",
+      "source_sha256": "e284cec6da2f6163eb6fa8ad361fb2d21b880f06e30d55674b2af28dd798c96b",
+      "prepared_sha256": "031b3f7c3eca204a67c8b38f6114c53b2cf78784a2b850ed5ab9d3cba54e70a2",
+      "source_dimensions": [
+        56,
+        142
+      ],
+      "normalized_cgbi": true
+    },
+    {
+      "name": "disk_1.png",
+      "archive_path": "Payload/Hanoi Plus.app/disk_1.png",
+      "source_sha256": "36c58afa8cb818c612af786334da5c217e99b9f93160aae754fbde4098a0fd5d",
+      "prepared_sha256": "db3a263f447baf40ae5bfa5af623591a7bce988b55c8a7524bc52aed07d19122",
+      "source_dimensions": [
+        51,
+        129
+      ],
+      "normalized_cgbi": true
+    },
+    {
+      "name": "disk_2.png",
+      "archive_path": "Payload/Hanoi Plus.app/disk_2.png",
+      "source_sha256": "a608f4755ffb76930ebbbab71d901f18779d17e3c5993a32ded08ad427dbebc4",
+      "prepared_sha256": "f3b38103c7b603f83b15924dd6c9fa2be2df793f03553ba7c267b890cd573499",
+      "source_dimensions": [
+        48,
+        118
+      ],
+      "normalized_cgbi": true
+    },
+    {
+      "name": "disk_3.png",
+      "archive_path": "Payload/Hanoi Plus.app/disk_3.png",
+      "source_sha256": "60388b68ec11b0b82dc371ecdd9162265e5456af3a4aaf8d5692198b00d5785d",
+      "prepared_sha256": "0135a3e5916d5af4f7fc277f7662a0f76e036c9b86ca0458dbe3e052f25d4cbb",
+      "source_dimensions": [
+        41,
+        104
+      ],
+      "normalized_cgbi": true
+    },
+    {
+      "name": "disk_4.png",
+      "archive_path": "Payload/Hanoi Plus.app/disk_4.png",
+      "source_sha256": "f991ad63389a47bedc8d2b8018acfc4af9c448df716f626431cb18fd4f135fa2",
+      "prepared_sha256": "28b8bd3c0be8bfa56956a0a95ba7ff1b2bcdfa67a376906c7806f170c9ae33cc",
+      "source_dimensions": [
+        34,
+        88
+      ],
+      "normalized_cgbi": true
+    },
+    {
+      "name": "disk_5.png",
+      "archive_path": "Payload/Hanoi Plus.app/disk_5.png",
+      "source_sha256": "bbd161f1bf7d20d3c021a0814a1ff7c6579b9e31ded61f17338071b6bc725a9b",
+      "prepared_sha256": "761e13ff21641d258b9d84cc3ea23083d0feee443cb50ff266d1dd939d84430b",
+      "source_dimensions": [
+        28,
+        74
+      ],
+      "normalized_cgbi": true
+    },
+    {
+      "name": "disk_6.png",
+      "archive_path": "Payload/Hanoi Plus.app/disk_6.png",
+      "source_sha256": "e97e86301cdd5f11fe6a9f075ad7a8fc15c44374b5d33183e3657ece9199492d",
+      "prepared_sha256": "57f3d92db8fbe1eae2bca7114a8fbe4eb1ca52e26b8c764f3178dab6cb28a1ce",
+      "source_dimensions": [
+        25,
+        61
+      ],
+      "normalized_cgbi": true
+    },
+    {
+      "name": "disk_7.png",
+      "archive_path": "Payload/Hanoi Plus.app/disk_7.png",
+      "source_sha256": "ba486016ba8d3d448fb7b7bcf1a95ac576325435e090087bd2a084a23c497f4d",
+      "prepared_sha256": "5d4a5761a1a8c455e1c063af180e229504acf9ed7cf5090d95eaebafe6c70529",
+      "source_dimensions": [
+        19,
+        49
+      ],
+      "normalized_cgbi": true
+    },
+    {
+      "name": "disk_8.png",
+      "archive_path": "Payload/Hanoi Plus.app/disk_8.png",
+      "source_sha256": "710cba12c55b8cbc75069898980b050ea8baf541f25137136bb33e25f8f89042",
+      "prepared_sha256": "dba32f17c350db9e065c4010eba5c563f904de605855a9e43680111ea01250e5",
+      "source_dimensions": [
+        16,
+        36
+      ],
+      "normalized_cgbi": true
+    },
+    {
+      "name": "disk_9.png",
+      "archive_path": "Payload/Hanoi Plus.app/disk_9.png",
+      "source_sha256": "e979a0e0d5226ad2bff460aec1052eab889336eaa7828fe5c46a4535ac67e47b",
+      "prepared_sha256": "e2dac490202b1ffbdbb95cd295b7ef6a5ef6e67c7ce899aaa9e404354c8d60aa",
+      "source_dimensions": [
+        12,
+        28
+      ],
+      "normalized_cgbi": true
+    }
+  ]
+}
