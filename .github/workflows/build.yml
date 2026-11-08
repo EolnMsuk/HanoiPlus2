@@ -70,6 +70,43 @@ jobs:
             DEVELOPMENT_TEAM='' \
             build 2>&1 | tee "$RUNNER_TEMP/HanoiPlusLogs/xcodebuild.log"
 
+      - name: Restore prepared gameplay PNGs
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          import shutil
+          from pathlib import Path
+
+          # Xcode may rewrite PNG files during resource copying. Bundle the
+          # validated standard PNGs exactly as prepared, before ad hoc signing.
+          app = Path(os.environ['RUNNER_TEMP']) / 'HanoiPlusDerivedData/Build/Products/Release-iphoneos/HanoiPlus.app'
+          source = Path('ios/HanoiPlus/Resources')
+          entries = json.loads(Path('ios/resource-manifest.json').read_text())['resources']
+          pngs = [entry for entry in entries if entry['name'].endswith('.png')]
+          assert app.is_dir(), f'Missing compiled app: {app}'
+          assert len(pngs) == 13, 'Expected all 13 prepared gameplay PNGs'
+          log = []
+          for entry in pngs:
+              name = entry['name']
+              prepared = source / name
+              bundled = app / name
+              expected = entry['prepared_sha256']
+              assert hashlib.sha256(prepared.read_bytes()).hexdigest() == expected, f'Prepared resource hash mismatch: {name}'
+              assert bundled.is_file(), f'Build did not include resource: {name}'
+              built_hash = hashlib.sha256(bundled.read_bytes()).hexdigest()
+              if built_hash != expected:
+                  shutil.copyfile(prepared, bundled)
+                  log.append(f'Restored {name}: built SHA256 {built_hash}; prepared SHA256 {expected}')
+              assert hashlib.sha256(bundled.read_bytes()).hexdigest() == expected, f'PNG restoration failed: {name}'
+          log.append(f'Verified exact prepared bytes for {len(pngs)} gameplay PNGs before signing.')
+          report = '\n'.join(log) + '\n'
+          print(report, end='')
+          (Path(os.environ['RUNNER_TEMP']) / 'HanoiPlusLogs/resources.txt').write_text(report, encoding='utf-8')
+          PY
+
       - name: Validate the compiled app
         run: |
           set -euo pipefail
@@ -125,7 +162,8 @@ jobs:
               assert (app / name).is_file(), f'Missing bundled resource: {name}'
           prepared = json.loads(Path('ios/resource-manifest.json').read_text())
           for entry in prepared['resources']:
-              assert hashlib.sha256((app / entry['name']).read_bytes()).hexdigest() == entry['prepared_sha256'], entry['name']
+              actual = hashlib.sha256((app / entry['name']).read_bytes()).hexdigest()
+              assert actual == entry['prepared_sha256'], f"Bundled resource {entry['name']}: expected {entry['prepared_sha256']}, got {actual}"
           assert not any(p.suffix.lower() in {'.c', '.cc', '.cpp', '.m', '.mm', '.h', '.swift'}
                          for p in app.rglob('*')), 'Source code was copied into the app'
 
