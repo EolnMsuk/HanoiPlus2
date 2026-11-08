@@ -1,0 +1,229 @@
+# User-triggered build of the reconstructed source. Reference IPA is not required.
+name: Build Hanoi Plus for TrollStore
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 25
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Record toolchain and check implementation prerequisites
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/HanoiPlusLogs"
+          {
+            xcodebuild -version
+            xcode-select -p
+            xcrun --sdk iphoneos --show-sdk-version
+            sw_vers
+            printf 'Source commit: %s\n' "$GITHUB_SHA"
+          } | tee "$RUNNER_TEMP/HanoiPlusLogs/toolchain.txt"
+
+          for required in \
+            ios/HanoiPlus.xcodeproj/project.pbxproj \
+            ios/HanoiPlus.xcodeproj/xcshareddata/xcschemes/HanoiPlus.xcscheme \
+            ios/HanoiPlus/Info.plist \
+            ios/HanoiPlus/main.m \
+            ios/HanoiPlus/Resources/disk_0.png \
+            ios/HanoiPlus/Resources/disk_9.png; do
+            if [[ ! -f "$required" ]]; then
+              printf '::error::Missing committed source/resource: %s\n' "$required"
+              exit 1
+            fi
+          done
+          python3 scripts/verify_local.py --skip-reference
+          plutil -lint ios/HanoiPlus/Info.plist ios/HanoiPlus.xcodeproj/project.pbxproj
+
+      - name: Compile the ARM64 iOS app
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -project ios/HanoiPlus.xcodeproj \
+            -scheme HanoiPlus \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath "$RUNNER_TEMP/HanoiPlusDerivedData" \
+            -resultBundlePath "$RUNNER_TEMP/HanoiPlusLogs/HanoiPlus.xcresult" \
+            ARCHS=arm64 \
+            ONLY_ACTIVE_ARCH=NO \
+            IPHONEOS_DEPLOYMENT_TARGET=16.0 \
+            DEBUG_INFORMATION_FORMAT=dwarf-with-dsym \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY='' \
+            CODE_SIGN_ENTITLEMENTS='' \
+            DEVELOPMENT_TEAM='' \
+            build 2>&1 | tee "$RUNNER_TEMP/HanoiPlusLogs/xcodebuild.log"
+
+      - name: Validate the compiled app
+        run: |
+          set -euo pipefail
+          export HANOI_APP="$RUNNER_TEMP/HanoiPlusDerivedData/Build/Products/Release-iphoneos/HanoiPlus.app"
+          test -d "$HANOI_APP"
+          file "$HANOI_APP/HanoiPlus"
+          test "$(xcrun lipo -archs "$HANOI_APP/HanoiPlus")" = arm64
+          xcrun otool -L "$HANOI_APP/HanoiPlus" | tee "$RUNNER_TEMP/HanoiPlusLogs/dependencies.txt"
+          xcrun dwarfdump --uuid "$HANOI_APP/HanoiPlus" | tee "$RUNNER_TEMP/HanoiPlusLogs/uuid.txt"
+          xcrun dwarfdump --uuid "$HANOI_APP.dSYM" | tee "$RUNNER_TEMP/HanoiPlusLogs/dsym-uuid.txt"
+          diff <(awk '{print $2, $3}' "$RUNNER_TEMP/HanoiPlusLogs/uuid.txt") \
+               <(awk '{print $2, $3}' "$RUNNER_TEMP/HanoiPlusLogs/dsym-uuid.txt")
+
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          import plistlib
+          import struct
+          from pathlib import Path
+
+          app = Path(os.environ['HANOI_APP'])
+          info = plistlib.loads((app / 'Info.plist').read_bytes())
+          assert info['CFBundleExecutable'] == 'HanoiPlus', info
+          assert info['CFBundleIdentifier'] == 'com.hanoiplus.v2', info
+          assert info['CFBundleDisplayName'] == 'Hanoi Plus', info
+          assert info['CFBundlePackageType'] == 'APPL', info
+          assert info['MinimumOSVersion'] == '16.0', info
+          assert info['CFBundleSupportedPlatforms'] == ['iPhoneOS'], info
+          assert info['UIDeviceFamily'] == [1], info
+          assert set(info['UISupportedInterfaceOrientations']) == {
+              'UIInterfaceOrientationLandscapeLeft',
+              'UIInterfaceOrientationLandscapeRight',
+          }, info
+          assert 'UILaunchScreen' in info or 'UILaunchStoryboardName' in info, info
+          assert info.get('CFBundleIcons', {}).get('CFBundlePrimaryIcon'), info
+          assert info['UIRequiredDeviceCapabilities'] == ['arm64'], info
+          manifest = info['UIApplicationSceneManifest']
+          assert not manifest['UIApplicationSupportsMultipleScenes'], info
+          configs = manifest['UISceneConfigurations']['UIWindowSceneSessionRoleApplication']
+          assert configs[0]['UISceneDelegateClassName'] == 'SceneDelegate', info
+          assert not {'CFBundleResourceSpecification', 'SignerIdentity'} & info.keys(), info
+          assert not (app / 'ResourceRules.plist').exists()
+          assert not (app / 'embedded.mobileprovision').exists()
+
+          resources = (
+              ['base.png', 'new_game.png', 'continue.png', 'click.wav', 'gong.wav',
+               'hanoi.jpg', 'winScreen.jpg']
+              + [f'disk_{i}.png' for i in range(10)]
+              + [f'hanoi_{i}.jpg' for i in range(8)]
+          )
+          for name in resources:
+              assert (app / name).is_file(), f'Missing bundled resource: {name}'
+          prepared = json.loads(Path('ios/resource-manifest.json').read_text())
+          for entry in prepared['resources']:
+              assert hashlib.sha256((app / entry['name']).read_bytes()).hexdigest() == entry['prepared_sha256'], entry['name']
+          assert not any(p.suffix.lower() in {'.c', '.cc', '.cpp', '.m', '.mm', '.h', '.swift'}
+                         for p in app.rglob('*')), 'Source code was copied into the app'
+
+          data = (app / 'HanoiPlus').read_bytes()
+          magic, cpu, subtype, kind, count, command_bytes, flags, reserved = struct.unpack_from('<8I', data)
+          assert magic == 0xFEEDFACF and cpu == 0x0100000C and kind == 2, 'Expected ARM64 executable'
+          assert 32 + command_bytes <= len(data), 'Invalid load-command area'
+          offset = 32
+          minimum_versions = []
+          for _ in range(count):
+              command, length = struct.unpack_from('<II', data, offset)
+              assert length >= 8 and offset + length <= 32 + command_bytes
+              if command == 0x32:  # LC_BUILD_VERSION
+                  assert length >= 24
+                  platform, minimum = struct.unpack_from('<II', data, offset + 8)
+                  assert platform == 2, 'Expected device iOS, not an iOS simulator'
+                  minimum_versions.append(minimum)
+              elif command == 0x25:  # LC_VERSION_MIN_IPHONEOS
+                  assert length >= 16
+                  minimum_versions.append(struct.unpack_from('<I', data, offset + 8)[0])
+              elif command == 0x2C:  # LC_ENCRYPTION_INFO_64
+                  assert length >= 24
+                  assert struct.unpack_from('<I', data, offset + 16)[0] == 0, 'Unexpected encryption'
+              elif command in (0xC, 0x80000018, 0x8000001F, 0x80000023):
+                  assert length >= 24
+                  name_offset = struct.unpack_from('<I', data, offset + 8)[0]
+                  assert 24 <= name_offset < length
+                  dependency = data[offset + name_offset:offset + length].split(b'\0', 1)[0]
+                  assert dependency.startswith((b'/System/Library/Frameworks/', b'/usr/lib/')), dependency
+                  assert b'libgcc_s' not in dependency, dependency
+              offset += length
+          assert offset == 32 + command_bytes, 'Inconsistent load-command lengths'
+          assert minimum_versions and all(v == 0x00100000 for v in minimum_versions), minimum_versions
+          print('Verified ARM64 device binary, iOS 16.0 minimum, metadata, and required resources.')
+          PY
+
+      - name: Apply ad hoc signing and package IPA and TIPA
+        run: |
+          set -euo pipefail
+          hanoi_products="$RUNNER_TEMP/HanoiPlusDerivedData/Build/Products/Release-iphoneos"
+          hanoi_stage="$RUNNER_TEMP/HanoiPlusPackage"
+          mkdir -p "$hanoi_stage/Payload" "$GITHUB_WORKSPACE/dist"
+          ditto "$hanoi_products/HanoiPlus.app" "$hanoi_stage/Payload/HanoiPlus.app"
+
+          codesign --force --sign - --timestamp=none "$hanoi_stage/Payload/HanoiPlus.app"
+          codesign --verify --strict --verbose=2 "$hanoi_stage/Payload/HanoiPlus.app"
+          codesign --display --verbose=4 "$hanoi_stage/Payload/HanoiPlus.app" \
+            2>&1 | tee "$RUNNER_TEMP/HanoiPlusLogs/signature.txt"
+
+          (
+            cd "$hanoi_stage"
+            COPYFILE_DISABLE=1 /usr/bin/zip -qry "$GITHUB_WORKSPACE/dist/HanoiPlus.ipa" Payload
+          )
+          cp "$GITHUB_WORKSPACE/dist/HanoiPlus.ipa" "$GITHUB_WORKSPACE/dist/HanoiPlus.tipa"
+
+          python3 - <<'PY'
+          import hashlib
+          import stat
+          import zipfile
+          from pathlib import Path
+
+          output = Path('dist')
+          ipa = output / 'HanoiPlus.ipa'
+          with zipfile.ZipFile(ipa) as archive:
+              assert archive.testzip() is None, 'Archive CRC failure'
+              names = archive.namelist()
+              assert all(n.startswith('Payload/') for n in names), names
+              assert {n.split('/')[1] for n in names if n.count('/') >= 2} == {'HanoiPlus.app'}
+              executable = archive.getinfo('Payload/HanoiPlus.app/HanoiPlus')
+              assert executable.external_attr >> 16 & stat.S_IXUSR, 'Executable permission lost'
+              assert 'Payload/HanoiPlus.app/Info.plist' in names
+          assert ipa.read_bytes() == (output / 'HanoiPlus.tipa').read_bytes()
+          checksums = ''.join(
+              f'{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.name}\n'
+              for p in (ipa, output / 'HanoiPlus.tipa')
+          )
+          (output / 'SHA256SUMS.txt').write_text(checksums, encoding='utf-8')
+          print(checksums)
+          PY
+
+      - name: Upload installable artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: HanoiPlus-TrollStore
+          path: |
+            dist/HanoiPlus.ipa
+            dist/HanoiPlus.tipa
+            dist/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload build diagnostics and symbols
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: HanoiPlus-diagnostics
+          path: |
+            ${{ runner.temp }}/HanoiPlusLogs/
+            ${{ runner.temp }}/HanoiPlusDerivedData/Build/Products/Release-iphoneos/HanoiPlus.app.dSYM/
+          if-no-files-found: warn
+          retention-days: 14
