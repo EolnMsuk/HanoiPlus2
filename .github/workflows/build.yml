@@ -156,11 +156,13 @@ jobs:
               ['base.png', 'new_game.png', 'continue.png', 'click.wav', 'gong.wav',
                'hanoi.jpg', 'winScreen.jpg']
               + [f'disk_{i}.png' for i in range(10)]
-              + [f'hanoi_{i}.jpg' for i in range(8)]
           )
+          assert len(resources) == 17
+          assert not any(app.glob('hanoi_[0-7].jpg')), 'Retired level photos were bundled'
           for name in resources:
               assert (app / name).is_file(), f'Missing bundled resource: {name}'
           prepared = json.loads(Path('ios/resource-manifest.json').read_text())
+          assert [entry['name'] for entry in prepared['resources']] == resources
           for entry in prepared['resources']:
               actual = hashlib.sha256((app / entry['name']).read_bytes()).hexdigest()
               assert actual == entry['prepared_sha256'], f"Bundled resource {entry['name']}: expected {entry['prepared_sha256']}, got {actual}"
