@@ -151,7 +151,7 @@
         return;
     }
     self.board = [[BoardView alloc] initWithState:self.state];
-    __weak typeof(self) weakSelf = self;
+    __weak GameViewController *weakSelf = self;
     self.board.moveHandler = ^(HPMoveResult result) { [weakSelf handleMove:result]; };
     self.clockLabel = [self labelAt:CGRectMake(6, 298, 100, 24) color:[UIColor colorWithWhite:200/255.0 alpha:1] size:12];
     self.movesLabel = [self labelAt:CGRectMake(190, 298, 100, 24) color:[UIColor colorWithWhite:150/255.0 alpha:1] size:12];
@@ -179,7 +179,7 @@
 - (void)startClockIfNeeded {
     if (!self.active || !self.inGame || !self.clockLabel || self.clockTimer) return;
     [self updateClock];
-    __weak typeof(self) weakSelf = self;
+    __weak GameViewController *weakSelf = self;
     self.clockTimer = [NSTimer timerWithTimeInterval:10 repeats:YES block:^(NSTimer *timer) { [weakSelf updateClock]; }];
     [[NSRunLoop mainRunLoop] addTimer:self.clockTimer forMode:NSRunLoopCommonModes];
 }
